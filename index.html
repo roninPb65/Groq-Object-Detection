@@ -1,14 +1,15 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --accent: #00e5ff;
   --accent2: #ff3d71;
   --accent3: #a3e635;
-  --panel: rgba(10,15,20,0.93);
-  --border: rgba(0,229,255,0.15);
-  --text: #e8f4f8;
-  --muted: rgba(180,210,225,0.5);
-  --font: 'Courier New', monospace;
+  --panel: rgba(10,15,20,0.95);
+  --border: rgba(0,229,255,0.2);
+  --text: #f0f8ff;
+  --muted: rgba(200,220,235,0.7);
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Courier New', monospace;
 }
 #app {
   width: 100%; min-height: 100vh; background: #07101a;
@@ -44,9 +45,9 @@
 .mode-tabs { display: flex; gap: 5px; flex-wrap: wrap; width: 100%; }
 .tab {
   padding: 6px 12px; border-radius: 5px; font-size: 10px; font-family: var(--font);
-  border: 1px solid var(--border); background: transparent; color: var(--muted);
+  border: 1px solid var(--border); background: rgba(0,229,255,0.05); color: var(--text);
   cursor: pointer; transition: all 0.15s; letter-spacing: 1px; flex: 1; min-width: 70px;
-  text-align: center;
+  text-align: center; font-weight: 600;
 }
 .tab.active { background: var(--accent); color: #07101a; border-color: var(--accent); font-weight: 700; }
 .tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
@@ -150,41 +151,41 @@
   #app { min-height: 100vh; border-radius: 0; }
   
   #topbar { 
-    padding: 8px 10px; 
-    gap: 8px;
+    padding: 12px 14px; 
+    gap: 10px;
   }
   
   .logo { 
-    font-size: 11px; 
+    font-size: 14px; 
     width: 100%;
     justify-content: center;
   }
   
   #api-row { 
     order: 3;
-    margin-top: 5px;
+    margin-top: 8px;
   }
   
   #api-input { 
-    font-size: 10px; 
-    padding: 6px 8px;
-    min-width: 100px;
+    font-size: 14px; 
+    padding: 10px 12px;
+    min-width: 120px;
   }
   
   #api-save { 
-    padding: 6px 10px; 
-    font-size: 10px;
+    padding: 10px 16px; 
+    font-size: 13px;
   }
   
   .mode-tabs { 
     order: 2;
-    gap: 4px;
+    gap: 6px;
   }
   
   .tab { 
-    padding: 7px 8px; 
-    font-size: 9px;
-    min-width: 60px;
+    padding: 10px 12px; 
+    font-size: 12px;
+    min-width: 70px;
   }
   
   #main { 
@@ -192,7 +193,7 @@
   }
   
   #camera-zone { 
-    min-height: 250px;
+    min-height: 280px;
     height: 40vh;
   }
   
@@ -204,114 +205,145 @@
   }
   
   .side-section { 
-    padding: 8px 10px; 
+    padding: 12px 14px; 
+  }
+  
+  .side-title {
+    font-size: 11px;
+    margin-bottom: 10px;
   }
   
   #chat-area { 
-    min-height: 180px;
-    padding: 8px 10px;
+    min-height: 200px;
+    padding: 12px 14px;
   }
   
   #chat-msgs { 
-    gap: 5px; 
+    gap: 8px; 
   }
   
   .msg { 
-    font-size: 10px; 
-    padding: 6px 8px;
+    font-size: 14px; 
+    padding: 10px 12px;
+    line-height: 1.5;
   }
   
   #chat-row { 
-    gap: 4px; 
+    gap: 8px; 
   }
   
   #chat-in { 
-    font-size: 10px; 
-    padding: 7px 8px;
-    min-height: 36px;
+    font-size: 14px; 
+    padding: 10px 12px;
+    min-height: 44px;
   }
   
   #send-btn { 
-    padding: 7px 10px; 
-    font-size: 10px;
+    padding: 10px 14px; 
+    font-size: 16px;
+    min-width: 44px;
   }
   
   #analyze-btn { 
-    padding: 8px; 
-    font-size: 9px;
+    padding: 12px; 
+    font-size: 13px;
+    letter-spacing: 1.5px;
   }
   
   #bottombar { 
-    padding: 6px 10px; 
-    gap: 8px;
-    font-size: 8px;
+    padding: 10px 14px; 
+    gap: 12px;
   }
   
   .spill { 
-    font-size: 8px; 
+    font-size: 11px; 
   }
   
   #mode-lbl { 
-    font-size: 8px; 
+    font-size: 11px; 
   }
   
   .det-item { 
-    padding: 5px 0; 
+    padding: 8px 0; 
+  }
+  
+  .det-ico {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
   }
   
   .det-name { 
-    font-size: 10px; 
+    font-size: 13px; 
   }
   
   .det-val { 
-    font-size: 9px;
-    max-width: 60px;
+    font-size: 12px;
+    max-width: 80px;
   }
   
   #alerts-box { 
-    max-height: 90px; 
+    max-height: 120px; 
   }
   
   .alert-item { 
-    font-size: 10px; 
-    padding: 5px 6px;
+    font-size: 13px; 
+    padding: 8px 10px;
+    margin-bottom: 5px;
+  }
+  
+  #no-cam {
+    font-size: 13px;
+  }
+  
+  #start-btn {
+    font-size: 14px;
+    padding: 14px 32px;
   }
 }
 
 /* Extra Small Mobile (iPhone SE, etc) */
 @media(max-width: 375px) {
   .logo { 
-    font-size: 10px; 
+    font-size: 13px; 
   }
   
   .tab { 
-    padding: 6px 6px; 
-    font-size: 8px;
-    min-width: 50px;
-    letter-spacing: 0.5px;
+    padding: 9px 8px; 
+    font-size: 11px;
+    min-width: 65px;
+    letter-spacing: 0.8px;
   }
   
   #camera-zone { 
-    min-height: 200px;
+    min-height: 220px;
     height: 35vh;
   }
   
   #chat-area { 
-    min-height: 150px;
+    min-height: 180px;
   }
   
   .msg { 
-    font-size: 9px; 
+    font-size: 13px; 
   }
   
   #bottombar { 
     flex-direction: column;
     align-items: flex-start;
-    gap: 5px;
+    gap: 8px;
   }
   
   #mode-lbl { 
     margin-left: 0; 
+  }
+  
+  #api-input { 
+    font-size: 13px; 
+  }
+  
+  .alert-item { 
+    font-size: 12px; 
   }
 }
 
