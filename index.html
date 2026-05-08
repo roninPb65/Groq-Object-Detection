@@ -1,4 +1,3 @@
-
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -12,8 +11,8 @@
   --font: 'Courier New', monospace;
 }
 #app {
-  width: 100%; min-height: 580px; background: #07101a;
-  border-radius: 12px; overflow: hidden;
+  width: 100%; min-height: 100vh; background: #07101a;
+  border-radius: 0; overflow: hidden;
   display: flex; flex-direction: column;
   font-family: var(--font); color: var(--text);
 }
@@ -26,27 +25,28 @@
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
 
 #api-row {
-  display: flex; align-items: center; gap: 6px; margin-left: auto; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; width: 100%;
 }
 #api-input {
   background: rgba(0,229,255,0.06); border: 1px solid var(--border);
   border-radius: 6px; padding: 5px 10px; color: var(--text);
-  font-family: var(--font); font-size: 11px; width: 200px; outline: none;
+  font-family: var(--font); font-size: 11px; flex: 1; min-width: 120px; outline: none;
 }
 #api-input:focus { border-color: var(--accent); }
 #api-save {
   padding: 5px 12px; background: var(--accent); border: none; border-radius: 6px;
   color: #07101a; font-family: var(--font); font-size: 11px; font-weight: 700;
-  cursor: pointer; letter-spacing: 1px;
+  cursor: pointer; letter-spacing: 1px; white-space: nowrap;
 }
 #api-save:hover { opacity: 0.85; }
 .api-ok { font-size: 10px; color: var(--accent3); letter-spacing: 1px; display: none; }
 
-.mode-tabs { display: flex; gap: 5px; }
+.mode-tabs { display: flex; gap: 5px; flex-wrap: wrap; width: 100%; }
 .tab {
-  padding: 4px 10px; border-radius: 5px; font-size: 10px; font-family: var(--font);
+  padding: 6px 12px; border-radius: 5px; font-size: 10px; font-family: var(--font);
   border: 1px solid var(--border); background: transparent; color: var(--muted);
-  cursor: pointer; transition: all 0.15s; letter-spacing: 1px;
+  cursor: pointer; transition: all 0.15s; letter-spacing: 1px; flex: 1; min-width: 70px;
+  text-align: center;
 }
 .tab.active { background: var(--accent); color: #07101a; border-color: var(--accent); font-weight: 700; }
 .tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
@@ -54,7 +54,7 @@
 #main { display: flex; flex: 1; min-height: 0; }
 
 #camera-zone {
-  flex: 1; position: relative; background: #000; min-height: 320px;
+  flex: 1; position: relative; background: #000; min-height: 280px;
   display: flex; align-items: center; justify-content: center;
 }
 #video { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -81,7 +81,7 @@
 .hud-fps { position:absolute; bottom:10px; right:10px; font-size:9px; color:var(--accent3); opacity:0.7; display:none; }
 
 #sidebar {
-  width: 255px; background: var(--panel); border-left: 1px solid var(--border);
+  width: 280px; background: var(--panel); border-left: 1px solid var(--border);
   display: flex; flex-direction: column; overflow: hidden;
 }
 .side-section { padding: 10px 12px; border-bottom: 1px solid var(--border); }
@@ -104,15 +104,15 @@
 .a-ok { background:rgba(163,230,53,0.1); border-color:var(--accent3); color:#a3e635; }
 .a-info { background:rgba(0,229,255,0.07); border-color:var(--accent); color:var(--accent); }
 
-#chat-area { flex:1; display:flex; flex-direction:column; overflow:hidden; padding:10px 12px; }
+#chat-area { flex:1; display:flex; flex-direction:column; overflow:hidden; padding:10px 12px; min-height: 200px; }
 #chat-msgs { flex:1; overflow-y:auto; margin-bottom:7px; display:flex; flex-direction:column; gap:6px; }
-.msg { font-size:11px; padding:7px 10px; border-radius:6px; line-height:1.6; }
+.msg { font-size:11px; padding:7px 10px; border-radius:6px; line-height:1.6; word-wrap: break-word; }
 .msg.ai { background:rgba(0,229,255,0.07); border:0.5px solid var(--border); color:var(--text); }
 .msg.usr { background:rgba(163,230,53,0.09); border:0.5px solid rgba(163,230,53,0.2); color:#c6f87a; align-self:flex-end; max-width:88%; }
 .msg.thinking { color:var(--muted); font-style:italic; }
 
 #analyze-btn {
-  width:100%; padding:7px; background:transparent;
+  width:100%; padding:9px; background:transparent;
   border:1px solid var(--accent); border-radius:6px; color:var(--accent);
   font-family:var(--font); font-size:10px; letter-spacing:1px; cursor:pointer;
   margin-bottom:7px; transition:all 0.15s;
@@ -124,7 +124,7 @@
 #chat-in {
   flex:1; background:rgba(255,255,255,0.04); border:1px solid var(--border);
   border-radius:6px; padding:6px 9px; color:var(--text); font-family:var(--font);
-  font-size:11px; outline:none; resize:none;
+  font-size:11px; outline:none; resize:none; min-height: 40px;
 }
 #chat-in:focus { border-color:var(--accent); }
 #send-btn {
@@ -145,10 +145,216 @@
 .sdot.ok { background:var(--accent3); }
 #mode-lbl { margin-left:auto; font-size:9px; color:var(--accent); letter-spacing:1.5px; }
 
-@media(max-width:560px){
-  #main{flex-direction:column;}
-  #sidebar{width:100%;min-height:300px;}
-  #api-input{width:140px;}
+/* Mobile Responsive Styles */
+@media(max-width: 768px) {
+  #app { min-height: 100vh; border-radius: 0; }
+  
+  #topbar { 
+    padding: 8px 10px; 
+    gap: 8px;
+  }
+  
+  .logo { 
+    font-size: 11px; 
+    width: 100%;
+    justify-content: center;
+  }
+  
+  #api-row { 
+    order: 3;
+    margin-top: 5px;
+  }
+  
+  #api-input { 
+    font-size: 10px; 
+    padding: 6px 8px;
+    min-width: 100px;
+  }
+  
+  #api-save { 
+    padding: 6px 10px; 
+    font-size: 10px;
+  }
+  
+  .mode-tabs { 
+    order: 2;
+    gap: 4px;
+  }
+  
+  .tab { 
+    padding: 7px 8px; 
+    font-size: 9px;
+    min-width: 60px;
+  }
+  
+  #main { 
+    flex-direction: column; 
+  }
+  
+  #camera-zone { 
+    min-height: 250px;
+    height: 40vh;
+  }
+  
+  #sidebar { 
+    width: 100%; 
+    border-left: none; 
+    border-top: 1px solid var(--border);
+    max-height: 60vh;
+  }
+  
+  .side-section { 
+    padding: 8px 10px; 
+  }
+  
+  #chat-area { 
+    min-height: 180px;
+    padding: 8px 10px;
+  }
+  
+  #chat-msgs { 
+    gap: 5px; 
+  }
+  
+  .msg { 
+    font-size: 10px; 
+    padding: 6px 8px;
+  }
+  
+  #chat-row { 
+    gap: 4px; 
+  }
+  
+  #chat-in { 
+    font-size: 10px; 
+    padding: 7px 8px;
+    min-height: 36px;
+  }
+  
+  #send-btn { 
+    padding: 7px 10px; 
+    font-size: 10px;
+  }
+  
+  #analyze-btn { 
+    padding: 8px; 
+    font-size: 9px;
+  }
+  
+  #bottombar { 
+    padding: 6px 10px; 
+    gap: 8px;
+    font-size: 8px;
+  }
+  
+  .spill { 
+    font-size: 8px; 
+  }
+  
+  #mode-lbl { 
+    font-size: 8px; 
+  }
+  
+  .det-item { 
+    padding: 5px 0; 
+  }
+  
+  .det-name { 
+    font-size: 10px; 
+  }
+  
+  .det-val { 
+    font-size: 9px;
+    max-width: 60px;
+  }
+  
+  #alerts-box { 
+    max-height: 90px; 
+  }
+  
+  .alert-item { 
+    font-size: 10px; 
+    padding: 5px 6px;
+  }
+}
+
+/* Extra Small Mobile (iPhone SE, etc) */
+@media(max-width: 375px) {
+  .logo { 
+    font-size: 10px; 
+  }
+  
+  .tab { 
+    padding: 6px 6px; 
+    font-size: 8px;
+    min-width: 50px;
+    letter-spacing: 0.5px;
+  }
+  
+  #camera-zone { 
+    min-height: 200px;
+    height: 35vh;
+  }
+  
+  #chat-area { 
+    min-height: 150px;
+  }
+  
+  .msg { 
+    font-size: 9px; 
+  }
+  
+  #bottombar { 
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  #mode-lbl { 
+    margin-left: 0; 
+  }
+}
+
+/* Tablet Styles */
+@media(min-width: 769px) and (max-width: 1024px) {
+  #sidebar { 
+    width: 320px; 
+  }
+  
+  #camera-zone { 
+    min-height: 350px; 
+  }
+  
+  .tab { 
+    padding: 7px 14px;
+  }
+}
+
+/* Landscape Mobile */
+@media(max-width: 768px) and (orientation: landscape) {
+  #app { 
+    min-height: 100vh; 
+  }
+  
+  #main { 
+    flex-direction: row; 
+  }
+  
+  #camera-zone { 
+    height: auto;
+    min-height: calc(100vh - 120px);
+  }
+  
+  #sidebar { 
+    width: 280px;
+    max-height: none;
+    border-left: 1px solid var(--border);
+    border-top: none;
+  }
+  
+  #chat-area { 
+    min-height: 150px;
+  }
 }
 </style>
 
@@ -158,7 +364,7 @@
   <div id="topbar">
     <div class="logo"><div class="pulse"></div>VISION AI <span style="color:var(--muted);font-size:9px;letter-spacing:1px;">GROQ</span></div>
     <div id="api-row">
-      <input id="api-input" type="password" value="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" placeholder="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" />
+      <input id="api-input" type="password" placeholder="Enter Groq API Key" value="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"/>
       <button id="api-save" onclick="saveKey()">SAVE</button>
       <span class="api-ok" id="api-ok">KEY SAVED</span>
     </div>
@@ -178,34 +384,37 @@
       <div class="hud-corner tr" id="hc2"></div>
       <div class="hud-corner bl" id="hc3"></div>
       <div class="hud-corner br" id="hc4"></div>
-      <div class="hud-live" id="hud-live">LIVE FEED</div>
-      <div class="hud-fps" id="fps-el">0 FPS</div>
+      <div class="hud-live" id="hud-live">● LIVE FEED</div>
+      <div class="hud-fps" id="hud-fps">FPS: 30</div>
       <div id="no-cam">
-        <div style="font-size:38px;">📷</div>
-        <div style="font-size:12px;letter-spacing:1px;color:var(--muted);">Camera not started</div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:6px;">Enter Groq API key above, then start camera</div>
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--accent);">CAMERA ACCESS REQUIRED</div>
         <button id="start-btn" onclick="startCam()">START CAMERA</button>
       </div>
     </div>
 
     <div id="sidebar">
       <div class="side-section">
-        <div class="side-title">DETECTED OBJECTS</div>
-        <div id="detections-list"><div style="color:var(--muted);font-size:10px;">Waiting for analysis...</div></div>
+        <div class="side-title">DETECTIONS</div>
+        <div id="detections-list">
+          <div style="font-size:10px;color:var(--muted);padding:5px 0;">No data yet — analyze first frame</div>
+        </div>
       </div>
+
       <div class="side-section">
         <div class="side-title">ALERTS</div>
-        <div id="alerts-box"><div class="alert-item a-info">System ready. Add API key to begin.</div></div>
-      </div>
-      <div id="chat-area">
-        <div class="side-title">AI ASSISTANT</div>
-        <div id="chat-msgs">
-          <div class="msg ai">Hi! I run on Groq's free API (Llama 4 Scout vision model). Paste your Groq API key above, start the camera, and I'll analyze what I see. Switch modes for specialized guidance — Driving mode is great for traffic safety!</div>
+        <div id="alerts-box">
+          <div class="alert-item a-info">System initialized</div>
         </div>
-        <button id="analyze-btn" disabled onclick="analyzeNow(false)">ANALYZE FRAME NOW</button>
+      </div>
+
+      <div id="chat-area">
+        <button id="analyze-btn" onclick="analyzeNow()">ANALYZE CURRENT FRAME</button>
+        <div id="chat-msgs">
+          <div class="msg ai">Vision AI ready. Click "Analyze Current Frame" to scan what the camera sees, or ask me anything about the scene.</div>
+        </div>
         <div id="chat-row">
-          <textarea id="chat-in" rows="2" placeholder="Ask about the scene..."></textarea>
-          <button id="send-btn" onclick="sendChat()">→</button>
+          <textarea id="chat-in" rows="1" placeholder="Ask about the scene..."></textarea>
+          <button id="send-btn" onclick="sendChat()">↑</button>
         </div>
       </div>
     </div>
@@ -213,128 +422,63 @@
 
   <div id="bottombar">
     <div class="spill"><div class="sdot" id="cam-dot"></div><span id="cam-st">CAMERA OFF</span></div>
-    <div class="spill"><div class="sdot" id="ai-dot"></div><span id="ai-st">AI IDLE</span></div>
-    <div class="spill" style="color:var(--muted);font-size:9px;">Model: llama-4-scout-17b-16e-instruct</div>
-    <div id="mode-lbl">MODE: GENERAL</div>
+    <div class="spill"><div class="sdot" id="ai-dot"></div><span id="ai-st">AI STANDBY</span></div>
+    <div id="mode-lbl">MODE: <span id="mode-txt">GENERAL</span></div>
   </div>
 </div>
 
 <script>
-let stream = null, analyzing = false, apiKey = '', currentMode = 'general';
-let history = [], lastFrame = null, fpsCount = 0, lastFpsT = Date.now();
-let autoTimer = null;
-
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-
-const MODELS = ['meta-llama/llama-4-scout-17b-16e-instruct', 'meta-llama/llama-4-maverick-17b-128e-instruct', 'llava-v1.5-7b-4096-preview'];
-let modelIdx = 0;
+let stream = null, apiKey = '', currentMode = 'general', analyzing = false;
+let history = [], lastFrame = null, modelIdx = 0;
+const MODELS = ['llama-3.2-90b-vision-preview', 'llama-3.2-11b-vision-preview'];
 
 const modePrompts = {
-  general: `You are a real-time visual object detection AI. Analyze this camera frame precisely.
-Respond in this EXACT format (no markdown, no extra text):
-SCENE: one sentence describing the overall scene
-OBJECTS: comma-separated list of detected objects/people/things
-DETAILS: 2-3 sentences of notable observations
-ALERT: only if something urgent or unusual (else write ALERT: none)`,
-
-  driving: `You are a driving safety AI analyzing a dashcam feed. Be concise and safety-focused.
-Respond in this EXACT format:
-SCENE: road/environment description
-OBJECTS: vehicles, pedestrians, cyclists, signs detected
-SIGNS: any traffic signs or signals visible (else "none seen")
-HAZARDS: potential dangers, proximity issues (else "none detected")
-ALERT: urgent safety warning if any (else ALERT: none)
-GUIDANCE: one driving tip or instruction`,
-
-  security: `You are a security surveillance AI. Analyze this camera frame.
-Respond in this EXACT format:
-SCENE: location/environment description
-PERSONS: count and general description of any people (no identification)
-ACTIVITY: what people are doing or environmental activity
-ENTRY POINTS: visible doors, windows, access areas
-ALERT: any suspicious activity or security concern (else ALERT: none)`,
-
-  custom: `You are a flexible visual assistant. Analyze this camera frame and describe everything you can observe clearly and helpfully. List all objects, people, text, actions, and environmental details you can see.`
+  general: 'List what you see. Format: OBJECTS: item1, item2 | SCENE: description | DETAILS: noteworthy observations. Skip any field if empty.',
+  driving: 'Analyze as a driver assistant. Format: SCENE: road description | HAZARDS: dangers ahead | SIGNS: visible traffic signs | GUIDANCE: driving advice. Skip any field if nothing detected.',
+  security: 'Security analysis. Format: PERSONS: count & locations | ACTIVITY: what\'s happening | ALERT: flag suspicious behavior or "None". Skip any field if empty.',
+  custom: 'Describe the scene thoroughly. Include objects, people, activities, and anything unusual.'
 };
 
 function saveKey() {
   const val = document.getElementById('api-input').value.trim();
-  if (!val || !val.startsWith('gsk_')) {
-    addAlert('warn', 'Invalid key — Groq keys start with gsk_');
-    return;
-  }
+  if (!val) return;
   apiKey = val;
+  localStorage.setItem('groq-key', val);
   document.getElementById('api-ok').style.display = 'inline';
-  document.getElementById('api-input').value = '••••••••••••••••';
-  document.getElementById('start-btn').disabled = false;
-  addAlert('ok', 'Groq API key saved — ready to start camera');
-  addMsg('ai', 'Groq API key saved! Now tap START CAMERA to begin live detection.');
+  setTimeout(() => document.getElementById('api-ok').style.display = 'none', 2000);
+  addAlert('ok', 'API key saved successfully');
+  document.getElementById('ai-dot').className = 'sdot ok';
+  document.getElementById('ai-st').textContent = 'AI READY';
 }
 
-function setMode(m) {
-  currentMode = m;
+function setMode(mode) {
+  currentMode = mode;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + m).classList.add('active');
-  document.getElementById('mode-lbl').textContent = 'MODE: ' + m.toUpperCase();
-  const hints = { general:'Detecting all objects and scene context.', driving:'Monitoring traffic, signs, and road hazards.', security:'Watching for people and security events.', custom:'Freeform — ask me anything about the scene.' };
-  addMsg('ai', 'Mode: ' + m.toUpperCase() + '. ' + hints[m]);
+  document.getElementById('tab-' + mode).classList.add('active');
+  document.getElementById('mode-txt').textContent = mode.toUpperCase();
+  addAlert('info', 'Mode changed to ' + mode.toUpperCase());
 }
 
 async function startCam() {
-  if (!apiKey) { addAlert('warn', 'Enter your Groq API key first!'); return; }
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} }, audio: false });
+    const btn = document.getElementById('start-btn');
+    btn.disabled = true;
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+    const video = document.getElementById('video');
     video.srcObject = stream;
-    await video.play();
     document.getElementById('no-cam').style.display = 'none';
-    ['hc1','hc2','hc3','hc4','hud-live','fps-el'].forEach(id => document.getElementById(id).style.display = 'block');
-    document.getElementById('cam-dot').className = 'sdot live';
-    document.getElementById('cam-st').textContent = 'LIVE';
-    document.getElementById('analyze-btn').disabled = false;
-    startFps();
-    scheduleAuto();
-    addMsg('ai', 'Camera live! Auto-analyzing every 10 seconds. Switch to DRIVING mode if you\'re in a vehicle for traffic safety guidance.');
-    addAlert('ok', 'Camera connected — live detection active');
+    ['hc1','hc2','hc3','hc4','hud-live','hud-fps'].forEach(id => document.getElementById(id).style.display = 'block');
+    document.getElementById('cam-dot').className = 'sdot ok';
+    document.getElementById('cam-st').textContent = 'CAMERA ON';
+    addAlert('ok', 'Camera started successfully');
   } catch(e) {
     addAlert('warn', 'Camera error: ' + e.message);
+    document.getElementById('start-btn').disabled = false;
   }
 }
 
-function startFps() {
-  setInterval(() => {
-    fpsCount++;
-    const now = Date.now();
-    if (now - lastFpsT >= 1000) {
-      document.getElementById('fps-el').textContent = fpsCount + ' FPS';
-      fpsCount = 0; lastFpsT = now;
-    }
-    renderFrame();
-  }, 80);
-}
-
-function renderFrame() {
-  if (!video.videoWidth) return;
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-  ctx.drawImage(video, 0, 0);
-  const t = Date.now() / 1000;
-  const scanY = (Math.sin(t * 0.5) * 0.5 + 0.5) * canvas.height;
-  const g = ctx.createLinearGradient(0, scanY-30, 0, scanY+30);
-  g.addColorStop(0,'rgba(0,229,255,0)'); g.addColorStop(0.5,'rgba(0,229,255,0.05)'); g.addColorStop(1,'rgba(0,229,255,0)');
-  ctx.fillStyle = g; ctx.fillRect(0, scanY-30, canvas.width, 60);
-  ctx.strokeStyle = 'rgba(0,229,255,0.12)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(0,scanY); ctx.lineTo(canvas.width,scanY); ctx.stroke();
-}
-
-function scheduleAuto() {
-  autoTimer = setTimeout(function loop() {
-    if (stream && !analyzing) analyzeNow(true);
-    autoTimer = setTimeout(loop, 10000);
-  }, 4000);
-}
-
 function captureJpeg() {
+  const video = document.getElementById('video');
   if (!video.videoWidth) return null;
   const c = document.createElement('canvas');
   c.width = 640; c.height = Math.round(video.videoHeight * 640 / video.videoWidth);
@@ -511,5 +655,15 @@ function addAlert(type, text) {
 document.getElementById('chat-in').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
 });
-document.getElementById('start-btn').disabled = true;
+
+// Auto-load saved API key
+const saved = localStorage.getItem('groq-key');
+if (saved) {
+  apiKey = saved;
+  document.getElementById('api-input').value = saved;
+  document.getElementById('ai-dot').className = 'sdot ok';
+  document.getElementById('ai-st').textContent = 'AI READY';
+}
+
+document.getElementById('start-btn').disabled = false;
 </script>
