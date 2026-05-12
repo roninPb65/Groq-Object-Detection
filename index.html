@@ -1,413 +1,682 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vision AI Surveillance — Groq Powered</title>
-  <meta name="description" content="Live browser-based video surveillance with real-time AI object detection powered by Groq free API." />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vision AI Surveillance — Groq + Flintstones Voice</title>
+  <meta name="description" content="Live AI object detection with Flintstones voice, dark/light mode, fully mobile responsive. Powered by Groq free API."/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --accent: #00e5ff; --accent2: #ff3d71; --accent3: #a3e635;
-      --panel: rgba(10,15,20,0.93); --border: rgba(0,229,255,0.15);
-      --text: #e8f4f8; --muted: rgba(180,210,225,0.5); --font: 'Courier New', monospace;
-    }
-    body { background:#040c14; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:var(--font); padding:16px; }
-    #app { width:100%; max-width:960px; min-height:580px; background:#07101a; border-radius:14px; border:1px solid var(--border); overflow:hidden; display:flex; flex-direction:column; color:var(--text); box-shadow:0 0 60px rgba(0,229,255,0.06); }
-    #topbar { background:var(--panel); border-bottom:1px solid var(--border); padding:10px 16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-    .logo { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--accent); letter-spacing:2.5px; }
-    .pulse { width:8px; height:8px; border-radius:50%; background:var(--accent); animation:blink 1.1s infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
-    #api-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-    #api-input { background:rgba(0,229,255,0.06); border:1px solid var(--border); border-radius:6px; padding:5px 10px; color:var(--text); font-family:var(--font); font-size:11px; width:210px; outline:none; }
-    #api-input:focus { border-color:var(--accent); }
-    #api-save { padding:5px 12px; background:var(--accent); border:none; border-radius:6px; color:#07101a; font-family:var(--font); font-size:11px; font-weight:700; cursor:pointer; letter-spacing:1px; }
-    #api-save:hover { opacity:0.85; }
-    .api-ok { font-size:10px; color:var(--accent3); letter-spacing:1px; display:none; }
-    .mode-tabs { display:flex; gap:5px; margin-left:auto; flex-wrap:wrap; }
-    .tab { padding:4px 11px; border-radius:5px; font-size:10px; font-family:var(--font); border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; transition:all 0.15s; letter-spacing:1px; }
-    .tab.active { background:var(--accent); color:#07101a; border-color:var(--accent); font-weight:700; }
-    .tab:hover:not(.active) { border-color:var(--accent); color:var(--accent); }
-    #main { display:flex; flex:1; min-height:0; }
-    #camera-zone { flex:1; position:relative; background:#000; min-height:320px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-    #video { width:100%; height:100%; object-fit:cover; display:block; }
-    #canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
-    #no-cam { display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding:40px 20px; position:absolute; }
-    #start-btn { padding:12px 28px; background:var(--accent); color:#07101a; border:none; border-radius:8px; font-family:var(--font); font-size:12px; font-weight:700; cursor:pointer; letter-spacing:1.5px; transition:transform 0.15s,opacity 0.15s; }
-    #start-btn:hover { opacity:0.85; transform:scale(0.98); }
-    #start-btn:disabled { opacity:0.35; cursor:not-allowed; transform:none; }
-    .hud-corner { position:absolute; width:22px; height:22px; border-color:var(--accent); border-style:solid; opacity:0.65; display:none; }
-    .hud-corner.tl { top:10px; left:10px; border-width:2px 0 0 2px; }
-    .hud-corner.tr { top:10px; right:10px; border-width:2px 2px 0 0; }
-    .hud-corner.bl { bottom:10px; left:10px; border-width:0 0 2px 2px; }
-    .hud-corner.br { bottom:10px; right:10px; border-width:0 2px 2px 0; }
-    .hud-live { position:absolute; top:12px; left:50%; transform:translateX(-50%); font-size:9px; letter-spacing:2px; color:var(--accent); opacity:0.6; display:none; }
-    .hud-fps  { position:absolute; bottom:12px; right:12px; font-size:9px; color:var(--accent3); opacity:0.7; display:none; }
-    #sidebar { width:262px; background:var(--panel); border-left:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
-    .side-section { padding:11px 13px; border-bottom:1px solid var(--border); }
-    .side-title { font-size:9px; letter-spacing:2px; color:var(--accent); text-transform:uppercase; margin-bottom:8px; }
-    #detections-list { font-size:11px; }
-    .det-item { display:flex; align-items:center; gap:7px; padding:4px 0; border-bottom:0.5px solid rgba(0,229,255,0.07); animation:fadeIn 0.3s; }
-    @keyframes fadeIn { from{opacity:0;transform:translateX(5px)} to{opacity:1;transform:none} }
-    .det-ico { width:26px; height:26px; border-radius:5px; background:rgba(0,229,255,0.09); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
-    .det-name { flex:1; font-size:11px; color:var(--text); }
-    .det-val { font-size:10px; color:var(--accent3); max-width:72px; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    #alerts-box { max-height:110px; overflow-y:auto; }
-    .alert-item { font-size:11px; padding:4px 8px; margin-bottom:3px; border-radius:4px; border-left:3px solid; animation:fadeIn 0.3s; }
-    .a-warn { background:rgba(255,61,113,0.1); border-color:var(--accent2); color:#ff8fab; }
-    .a-ok   { background:rgba(163,230,53,0.1); border-color:var(--accent3); color:#a3e635; }
-    .a-info { background:rgba(0,229,255,0.07); border-color:var(--accent);  color:var(--accent); }
-    #chat-area { flex:1; display:flex; flex-direction:column; overflow:hidden; padding:10px 13px; }
-    #chat-msgs { flex:1; overflow-y:auto; margin-bottom:8px; display:flex; flex-direction:column; gap:6px; }
-    .msg { font-size:11px; padding:7px 10px; border-radius:6px; line-height:1.65; }
-    .msg.ai  { background:rgba(0,229,255,0.07); border:0.5px solid var(--border); color:var(--text); }
-    .msg.usr { background:rgba(163,230,53,0.09); border:0.5px solid rgba(163,230,53,0.2); color:#c6f87a; align-self:flex-end; max-width:90%; }
-    .msg.thinking { color:var(--muted); font-style:italic; }
-    #analyze-btn { width:100%; padding:7px; background:transparent; border:1px solid var(--accent); border-radius:6px; color:var(--accent); font-family:var(--font); font-size:10px; letter-spacing:1px; cursor:pointer; margin-bottom:8px; transition:all 0.15s; }
-    #analyze-btn:hover:not(:disabled) { background:rgba(0,229,255,0.09); }
-    #analyze-btn:disabled { opacity:0.3; cursor:not-allowed; }
-    #chat-row { display:flex; gap:5px; }
-    #chat-in { flex:1; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:6px; padding:6px 9px; color:var(--text); font-family:var(--font); font-size:11px; outline:none; resize:none; }
-    #chat-in:focus { border-color:var(--accent); }
-    #send-btn { padding:6px 13px; background:var(--accent); border:none; border-radius:6px; color:#07101a; font-family:var(--font); font-size:13px; font-weight:700; cursor:pointer; align-self:flex-end; }
-    #send-btn:hover { opacity:0.85; }
-    #send-btn:disabled { opacity:0.35; cursor:not-allowed; }
-    #bottombar { background:var(--panel); border-top:1px solid var(--border); padding:7px 16px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-    .spill { display:flex; align-items:center; gap:5px; font-size:9px; letter-spacing:1px; color:var(--muted); }
-    .sdot { width:6px; height:6px; border-radius:50%; background:var(--muted); }
-    .sdot.live { background:var(--accent2); animation:blink 1s infinite; }
-    .sdot.ok   { background:var(--accent3); }
-    #mode-lbl { margin-left:auto; font-size:9px; color:var(--accent); letter-spacing:1.5px; }
-    @media(max-width:640px) { #main{flex-direction:column;} #sidebar{width:100%;min-height:300px;} #api-input{width:150px;} .mode-tabs{margin-left:0;} }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow-x:hidden;}
+
+[data-theme="dark"]{
+  --bg:#0a0f16;--panel:#111820;--panel2:#0d1520;
+  --border:rgba(0,220,255,0.14);--border2:rgba(0,220,255,0.07);
+  --accent:#00dcff;--a2:#ff3366;--a3:#7ed321;--fred:#f5a623;
+  --text:#ddeeff;--sub:#7a9ab5;
+  --det:#0d1e2a;--chat-ai:#0d1e2a;--chat-usr:#0d200a;
+  --chat-usr-text:#8ecc40;--input:#0d1825;--scan:rgba(0,220,255,0.06);
+}
+[data-theme="light"]{
+  --bg:#f2f6fa;--panel:#ffffff;--panel2:#f8fafc;
+  --border:rgba(0,120,160,0.15);--border2:rgba(0,120,160,0.07);
+  --accent:#0088bb;--a2:#cc0044;--a3:#3a7a00;--fred:#c47000;
+  --text:#1a2d3d;--sub:#6a8a9a;
+  --det:#eef4f8;--chat-ai:#eef4f8;--chat-usr:#eaf4e0;
+  --chat-usr-text:#2d5a00;--input:#f0f5f9;--scan:rgba(0,120,160,0.08);
+}
+
+body{background:var(--bg);font-family:'Courier New',monospace;color:var(--text);transition:background .3s,color .3s;}
+#wrap{width:100%;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg);}
+
+/* HEADER */
+#hdr{background:var(--panel);border-bottom:1px solid var(--border);padding:10px 14px 8px;display:flex;flex-direction:column;gap:7px;transition:background .3s;}
+.hdr-row{display:flex;align-items:center;gap:8px;}
+.logo{font-size:12px;font-weight:700;letter-spacing:2.5px;color:var(--accent);display:flex;align-items:center;gap:6px;}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:blink 1.2s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+.badge{font-size:8px;letter-spacing:1px;color:var(--sub);border:1px solid var(--border);border-radius:10px;padding:1px 6px;}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:7px;}
+#theme-btn{display:flex;align-items:center;gap:5px;padding:5px 9px;background:transparent;border:1px solid var(--border);border-radius:16px;cursor:pointer;color:var(--accent);font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;-webkit-tap-highlight-color:transparent;transition:all .2s;}
+#theme-btn:active{opacity:.7;}
+#mode-pill{font-size:8px;letter-spacing:1.5px;color:var(--sub);border:1px solid var(--border2);border-radius:10px;padding:2px 7px;white-space:nowrap;}
+
+#api-row{display:flex;gap:6px;}
+#api-in{flex:1;min-width:0;background:var(--input);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text);font-family:'Courier New',monospace;font-size:12px;outline:none;transition:border-color .2s;}
+#api-in::placeholder{color:var(--sub);font-size:11px;}
+#api-in:focus{border-color:var(--accent);}
+#api-btn{padding:9px 13px;background:var(--accent);border:none;border-radius:9px;color:#07101a;font-family:'Courier New',monospace;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.5px;-webkit-tap-highlight-color:transparent;}
+#api-ok{font-size:10px;color:var(--a3);display:none;align-self:center;white-space:nowrap;}
+
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:6px 13px;border-radius:7px;font-size:10px;font-family:'Courier New',monospace;border:1px solid var(--border);background:transparent;color:var(--sub);cursor:pointer;white-space:nowrap;letter-spacing:.8px;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:all .18s;}
+.tab.on{background:var(--accent);color:#07101a;border-color:var(--accent);font-weight:700;}
+
+/* CAMERA */
+#cam-wrap{position:relative;width:100%;background:#000;aspect-ratio:16/9;max-height:230px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#vid{width:100%;height:100%;object-fit:cover;display:block;}
+#cv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+#nocam{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center;}
+#nocam .sub{font-size:11px;color:rgba(180,210,225,0.8);line-height:1.5;}
+#cam-btn{padding:11px 22px;background:var(--accent);color:#07101a;border:none;border-radius:10px;font-family:'Courier New',monospace;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;-webkit-tap-highlight-color:transparent;}
+#cam-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+.hc{position:absolute;width:16px;height:16px;border-color:var(--accent);border-style:solid;opacity:.6;display:none;}
+.hc.tl{top:8px;left:8px;border-width:2px 0 0 2px;}
+.hc.tr{top:8px;right:8px;border-width:2px 2px 0 0;}
+.hc.bl{bottom:8px;left:8px;border-width:0 0 2px 2px;}
+.hc.br{bottom:8px;right:8px;border-width:0 2px 2px 0;}
+.hud-live{position:absolute;top:7px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:2px;color:var(--accent);opacity:.65;display:none;}
+.hud-fps{position:absolute;bottom:7px;right:9px;font-size:8px;color:var(--a3);opacity:.75;display:none;}
+
+/* ACTION BAR */
+#act{display:flex;gap:7px;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--border);}
+#scan-btn{flex:1;padding:10px;background:transparent;border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-family:'Courier New',monospace;font-size:10px;letter-spacing:.8px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s;}
+#scan-btn:disabled{opacity:.3;cursor:not-allowed;}
+#scan-btn:active:not(:disabled){background:rgba(0,220,255,.08);}
+.pills{display:flex;flex-direction:column;gap:3px;justify-content:center;min-width:80px;}
+.pill{display:flex;align-items:center;gap:4px;font-size:9px;letter-spacing:.6px;color:var(--sub);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--sub);flex-shrink:0;transition:background .2s;}
+.dot.live{background:var(--a2);animation:blink 1s infinite;}
+.dot.ok{background:var(--a3);}
+
+/* FRED PANEL */
+#fred-panel{background:var(--panel2);border-bottom:1px solid var(--border);transition:background .3s;}
+#fred-top{display:flex;align-items:center;gap:10px;padding:9px 13px;}
+.fred-ico{font-size:18px;}
+.fred-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--fred);}
+.fred-desc{font-size:10px;color:var(--sub);flex:1;}
+#spk-badge{display:none;align-items:center;gap:4px;font-size:9px;color:var(--fred);letter-spacing:1px;}
+#spk-badge.on{display:flex;}
+.wv{display:flex;align-items:center;gap:2px;}
+.wb{width:2px;border-radius:2px;background:var(--fred);animation:wv .55s ease-in-out infinite;}
+.wb:nth-child(1){height:4px;animation-delay:0s;}
+.wb:nth-child(2){height:8px;animation-delay:.1s;}
+.wb:nth-child(3){height:5px;animation-delay:.2s;}
+.wb:nth-child(4){height:10px;animation-delay:.05s;}
+.wb:nth-child(5){height:4px;animation-delay:.15s;}
+@keyframes wv{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.9)}}
+
+#vtog{position:relative;width:42px;height:23px;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.35);border-radius:12px;cursor:pointer;flex-shrink:0;transition:background .2s,border-color .2s;-webkit-tap-highlight-color:transparent;}
+#vtog.on{background:var(--fred);border-color:var(--fred);}
+.vknob{position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s;}
+#vtog.on .vknob{transform:translateX(19px);}
+
+#fred-sliders{display:flex;gap:8px;padding:0 13px 10px;align-items:center;}
+.sl-lbl{font-size:9px;color:var(--sub);white-space:nowrap;letter-spacing:.8px;}
+#pitch-sl,#rate-sl{flex:1;}
+#fred-test{padding:6px 11px;background:transparent;border:1px solid rgba(245,166,35,.4);border-radius:7px;color:var(--fred);font-family:'Courier New',monospace;font-size:9px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:background .15s;}
+#fred-test:active{background:rgba(245,166,35,.1);}
+
+/* DETECTIONS */
+#dets{padding:9px 12px 8px;border-bottom:1px solid var(--border);}
+.sec{font-size:8px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;}
+.di{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:.5px solid var(--border2);animation:fi .3s;}
+@keyframes fi{from{opacity:0;transform:translateX(4px)}to{opacity:1;transform:none}}
+.di-ico{width:26px;height:26px;border-radius:6px;background:var(--det);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.di-name{flex:1;font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.di-val{font-size:9px;color:var(--a3);max-width:78px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ALERTS */
+#alts{padding:8px 12px;border-bottom:1px solid var(--border);}
+#alt-box{max-height:72px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;}
+.al{font-size:11px;padding:4px 8px;border-radius:4px;border-left:3px solid;line-height:1.4;animation:fi .3s;}
+.al-w{background:rgba(255,50,100,.08);border-color:var(--a2);color:var(--a2);}
+.al-g{background:rgba(100,200,0,.08);border-color:var(--a3);color:var(--a3);}
+.al-b{background:rgba(0,220,255,.06);border-color:var(--accent);color:var(--accent);}
+
+/* CHAT */
+#chat{flex:1;display:flex;flex-direction:column;min-height:0;}
+#msgs{flex:1;overflow-y:auto;padding:9px 12px;display:flex;flex-direction:column;gap:7px;min-height:130px;max-height:200px;}
+.m{font-size:12px;padding:8px 10px;border-radius:8px;line-height:1.6;}
+.m.ai{background:var(--chat-ai);border:.5px solid var(--border);color:var(--text);}
+.m.me{background:var(--chat-usr);border:.5px solid var(--border2);color:var(--chat-usr-text);align-self:flex-end;max-width:86%;}
+.m.th{color:var(--sub);font-style:italic;}
+
+#inp-row{display:flex;gap:6px;padding:9px 12px 16px;border-top:.5px solid var(--border);}
+#cin{flex:1;min-width:0;background:var(--input);border:1px solid var(--border);border-radius:10px;padding:9px 11px;color:var(--text);font-family:'Courier New',monospace;font-size:13px;outline:none;resize:none;line-height:1.4;-webkit-appearance:none;transition:border-color .2s;}
+#cin:focus{border-color:var(--accent);}
+#cin::placeholder{color:var(--sub);}
+#send{padding:9px 13px;background:var(--accent);border:none;border-radius:10px;color:#07101a;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+#send:disabled{opacity:.35;cursor:not-allowed;}
+#send:active:not(:disabled){opacity:.75;}
   </style>
 </head>
 <body>
+<div id="wrap" data-theme="dark">
 
-<div id="app">
-  <div id="topbar">
-    <div class="logo"><div class="pulse"></div>VISION AI <span style="color:var(--muted);font-size:9px;letter-spacing:1px;font-weight:400;">GROQ</span></div>
-    <div id="api-row">
-      <input id="api-input" type="password" placeholder="Paste Groq API key (gsk_...)" value="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" />
-      <button id="api-save" onclick="saveKey()">SAVE</button>
-      <span class="api-ok" id="api-ok">✓ KEY SAVED</span>
-    </div>
-    <div class="mode-tabs">
-      <button class="tab active" onclick="setMode('general')"  id="tab-general">GENERAL</button>
-      <button class="tab"        onclick="setMode('driving')"  id="tab-driving">DRIVING</button>
-      <button class="tab"        onclick="setMode('security')" id="tab-security">SECURITY</button>
-      <button class="tab"        onclick="setMode('custom')"   id="tab-custom">CUSTOM</button>
-    </div>
-  </div>
-
-  <div id="main">
-    <div id="camera-zone">
-      <video id="video" autoplay playsinline muted></video>
-      <canvas id="canvas"></canvas>
-      <div class="hud-corner tl" id="hc1"></div>
-      <div class="hud-corner tr" id="hc2"></div>
-      <div class="hud-corner bl" id="hc3"></div>
-      <div class="hud-corner br" id="hc4"></div>
-      <div class="hud-live" id="hud-live">● LIVE FEED</div>
-      <div class="hud-fps"  id="fps-el">0 FPS</div>
-      <div id="no-cam">
-        <i class="ti ti-camera" style="font-size:52px;color:var(--accent);opacity:0.3;"></i>
-        <div style="font-size:13px;letter-spacing:1px;color:var(--muted);">Camera not started</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Add your Groq API key above, then start the camera</div>
-        <button id="start-btn" onclick="startCam()" disabled>▶ START CAMERA</button>
+  <!-- HEADER -->
+  <div id="hdr">
+    <div class="hdr-row">
+      <div class="logo">
+        <div class="pulse"></div>
+        VISION AI
+        <span class="badge">GROQ</span>
       </div>
-    </div>
-
-    <div id="sidebar">
-      <div class="side-section">
-        <div class="side-title">Detected Objects</div>
-        <div id="detections-list"><div style="color:var(--muted);font-size:10px;">Waiting for analysis...</div></div>
-      </div>
-      <div class="side-section">
-        <div class="side-title">Alerts</div>
-        <div id="alerts-box"><div class="alert-item a-info">System ready — add API key to begin.</div></div>
-      </div>
-      <div id="chat-area">
-        <div class="side-title">AI Assistant</div>
-        <div id="chat-msgs">
-          <div class="msg ai">Hi! I run on Groq's free API (Llama 4 Scout vision). Paste your Groq key above, start the camera, and I'll analyze what I see every 10 seconds. Switch to DRIVING mode if you're in a vehicle for traffic safety!</div>
-        </div>
-        <button id="analyze-btn" onclick="analyzeNow(false)" disabled>
-          <i class="ti ti-scan"></i> ANALYZE FRAME NOW
+      <div class="hdr-right">
+        <button id="theme-btn" onclick="toggleTheme()">
+          <i class="ti ti-moon" id="th-ico"></i>
+          <span id="th-lbl">DARK</span>
         </button>
-        <div id="chat-row">
-          <textarea id="chat-in" rows="2" placeholder="Ask about what you see..."></textarea>
-          <button id="send-btn" onclick="sendChat()">→</button>
-        </div>
+        <div id="mode-pill">GENERAL</div>
       </div>
+    </div>
+    <div id="api-row">
+      <input id="api-in" type="password" value="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" placeholder="Groq API key  gsk_..." autocomplete="off"/>
+      <button id="api-btn" onclick="saveKey()">SAVE</button>
+      <span id="api-ok">✓ SAVED</span>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab on"  onclick="setMode('general')"  id="t-gen">GENERAL</button>
+      <button class="tab"     onclick="setMode('driving')"  id="t-drv">DRIVING</button>
+      <button class="tab"     onclick="setMode('security')" id="t-sec">SECURITY</button>
+      <button class="tab"     onclick="setMode('custom')"   id="t-cus">CUSTOM</button>
     </div>
   </div>
 
-  <div id="bottombar">
-    <div class="spill"><div class="sdot" id="cam-dot"></div><span id="cam-st">CAMERA OFF</span></div>
-    <div class="spill"><div class="sdot" id="ai-dot"></div><span id="ai-st">AI IDLE</span></div>
-    <div class="spill" style="font-size:9px;color:var(--muted);">Model: llama-4-scout-17b-16e-instruct</div>
-    <div id="mode-lbl">MODE: GENERAL</div>
+  <!-- CAMERA -->
+  <div id="cam-wrap">
+    <video id="vid" autoplay playsinline muted></video>
+    <canvas id="cv"></canvas>
+    <div class="hc tl" id="c1"></div><div class="hc tr" id="c2"></div>
+    <div class="hc bl" id="c3"></div><div class="hc br" id="c4"></div>
+    <div class="hud-live" id="hlive">● LIVE</div>
+    <div class="hud-fps"  id="hfps">0 FPS</div>
+    <div id="nocam">
+      <i class="ti ti-camera" style="font-size:36px;color:var(--accent);opacity:.3;"></i>
+      <div class="sub">Paste your Groq key above,<br>then tap Start Camera</div>
+      <button id="cam-btn" onclick="startCam()" disabled>▶ START CAMERA</button>
+    </div>
   </div>
+
+  <!-- ACTION BAR -->
+  <div id="act">
+    <button id="scan-btn" onclick="doScan()" disabled>
+      <i class="ti ti-scan"></i> ANALYZE NOW
+    </button>
+    <div class="pills">
+      <div class="pill"><div class="dot" id="cdot"></div><span id="cst">CAMERA OFF</span></div>
+      <div class="pill"><div class="dot" id="adot"></div><span id="ast">AI IDLE</span></div>
+    </div>
+  </div>
+
+  <!-- FRED VOICE -->
+  <div id="fred-panel">
+    <div id="fred-top">
+      <span class="fred-ico">🦕</span>
+      <div style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;">
+        <div class="fred-title">YABBA DABBA VOICE</div>
+        <div class="fred-desc" id="fdesc">OFF — flip to hear Fred narrate</div>
+      </div>
+      <div id="spk-badge">
+        <div class="wv">
+          <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+          <div class="wb"></div><div class="wb"></div>
+        </div>
+        FRED
+      </div>
+      <div id="vtog" onclick="toggleVoice()" role="switch" aria-checked="false" aria-label="Toggle Flintstones voice">
+        <div class="vknob"></div>
+      </div>
+    </div>
+    <div id="fred-sliders">
+      <span class="sl-lbl">GRAVEL</span>
+      <input type="range" id="pitch-sl" min="0.05" max="0.45" step="0.05" value="0.15"/>
+      <span class="sl-lbl" style="margin-left:6px;">PACE</span>
+      <input type="range" id="rate-sl"  min="0.65" max="1.05" step="0.05" value="0.8"/>
+      <button id="fred-test" onclick="fredTest()">TEST 🎙️</button>
+    </div>
+  </div>
+
+  <!-- DETECTIONS -->
+  <div id="dets">
+    <div class="sec">DETECTED OBJECTS</div>
+    <div id="det-list"><div style="color:var(--sub);font-size:11px;padding:3px 0;">Waiting for analysis...</div></div>
+  </div>
+
+  <!-- ALERTS -->
+  <div id="alts">
+    <div class="sec">ALERTS</div>
+    <div id="alt-box"><div class="al al-b">System ready — add API key to begin.</div></div>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chat">
+    <div style="padding:7px 12px 0;"><div class="sec">AI ASSISTANT</div></div>
+    <div id="msgs">
+      <div class="m ai">Yabba dabba doo! I'm your Vision AI. Save your Groq key, start the camera, and I'll detect objects every 10s. Flip the 🦕 voice switch — Fred will narrate what he sees! Use the GRAVEL slider for that deep Bedrock rumble.</div>
+    </div>
+    <div id="inp-row">
+      <textarea id="cin" rows="2" placeholder="Ask about what you see..."></textarea>
+      <button id="send" onclick="sendChat()">→</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
-let stream=null, analyzing=false, apiKey='', currentMode='general';
-let history=[], lastFrame=null, fpsCount=0, lastFpsT=Date.now(), modelIdx=0;
-
-const MODELS=[
+// ─── Config ───────────────────────────────────────────────────────────────────
+const MODELS = [
   'meta-llama/llama-4-scout-17b-16e-instruct',
   'meta-llama/llama-4-maverick-17b-128e-instruct',
   'llava-v1.5-7b-4096-preview'
 ];
 
-const video=document.getElementById('video');
-const canvas=document.getElementById('canvas');
-const ctx=canvas.getContext('2d');
+const PROMPTS = {
+  general: `Analyze this camera frame. EXACT format, no markdown:
+SCENE: one-sentence scene description
+OBJECTS: comma-separated detected objects/people/things
+DETAILS: 2-3 notable observations
+ALERT: urgent issue only, else: ALERT: none`,
 
-const MODE_PROMPTS={
-  general:`You are a real-time visual object detection AI. Analyze this camera frame precisely.
-Respond in this EXACT format (no markdown):
-SCENE: one sentence describing the overall scene
-OBJECTS: comma-separated list of detected objects/people/things
-DETAILS: 2-3 sentences of notable observations
-ALERT: urgent issue if any, else write: ALERT: none`,
+  driving: `Dashcam safety analysis. EXACT format:
+SCENE: road/environment
+OBJECTS: vehicles, pedestrians, cyclists, signs
+SIGNS: traffic signs or signals (else: none seen)
+HAZARDS: dangers or proximity issues (else: none)
+ALERT: urgent safety warning (else: ALERT: none)
+GUIDANCE: one driving instruction`,
 
-  driving:`You are a driving safety AI analyzing a dashcam feed. Be concise and safety-focused.
-Respond in this EXACT format:
-SCENE: road/environment description
-OBJECTS: vehicles, pedestrians, cyclists, signs detected
-SIGNS: any traffic signs or signals visible (else "none seen")
-HAZARDS: potential dangers, proximity issues (else "none detected")
-ALERT: urgent safety warning if any (else: ALERT: none)
-GUIDANCE: one driving tip or instruction`,
+  security: `Security surveillance analysis. EXACT format:
+SCENE: location description
+PERSONS: count and general description only
+ACTIVITY: observed activity
+ENTRY POINTS: doors, windows, access areas
+ALERT: security concern (else: ALERT: none)`,
 
-  security:`You are a security surveillance AI. Analyze this camera frame.
-Respond in this EXACT format:
-SCENE: location/environment description
-PERSONS: count and general description of any people visible (no identification)
-ACTIVITY: what people are doing or environmental activity
-ENTRY POINTS: visible doors, windows, access areas
-ALERT: suspicious activity or concern (else: ALERT: none)`,
-
-  custom:`You are a flexible visual assistant. Analyze this camera frame and describe everything you observe clearly. List all objects, people, text, actions, and environmental details.`
+  custom: `Describe everything visible in this camera frame in detail. List all objects, people, text, and activities.`
 };
 
-const MODE_HINTS={
-  general:'Detecting all objects and scene context.',
-  driving:'Monitoring traffic, signs, and road hazards.',
-  security:'Watching for people and security events.',
-  custom:'Freeform — ask me anything about the scene.'
+const HINTS = {
+  general:  'Detecting objects and scene.',
+  driving:  'Traffic, signs, hazard monitoring.',
+  security: 'People and security monitoring.',
+  custom:   'Freeform visual analysis.'
 };
 
-function saveKey(){
-  const val=document.getElementById('api-input').value.trim();
-  if(!val.startsWith('gsk_')){ addAlert('warn','Invalid key — Groq keys start with gsk_'); return; }
-  apiKey=val;
-  document.getElementById('api-ok').style.display='inline';
-  document.getElementById('api-input').value='••••••••••••••••••••';
-  document.getElementById('start-btn').disabled=false;
-  addAlert('ok','Groq API key saved — ready to start camera');
-  addMsg('ai','API key saved! Tap START CAMERA to begin live detection.');
+const FRED_INTROS = [
+  "Yabba dabba doo! I see",
+  "Great balls of fire! I spot",
+  "Wilmaaa! Look at this —",
+  "Holy pterodactyl! Detecting",
+  "By the great gazoo!",
+  "Bedrock report, pal!",
+  "Dino alert! There is",
+  "What in tarnation! I see"
+];
+
+const FRED_HAZARD = [
+  "WATCH OUT PAL!",
+  "GREAT GAZOO DANGER!",
+  "FRED FLINTSTONE SAYS BRAKE!",
+  "BARNEY, LOOK OUT!"
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let stream = null, busy = false, key = '', mode = 'general';
+let hist = [], lastB64 = null, fps = 0, fpsT = Date.now(), mIdx = 0;
+let voiceOn = false, dark = true;
+
+const vid = document.getElementById('vid');
+const cv  = document.getElementById('cv');
+const cx  = cv.getContext('2d');
+
+// ─── Theme ────────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  dark = !dark;
+  document.getElementById('wrap').setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.getElementById('th-ico').className = dark ? 'ti ti-moon' : 'ti ti-sun';
+  document.getElementById('th-lbl').textContent = dark ? 'DARK' : 'LIGHT';
 }
 
-function setMode(m){
-  currentMode=m;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+m).classList.add('active');
-  document.getElementById('mode-lbl').textContent='MODE: '+m.toUpperCase();
-  addMsg('ai','Mode: '+m.toUpperCase()+'. '+MODE_HINTS[m]);
+// ─── Fred Voice ───────────────────────────────────────────────────────────────
+function pickFredVoice() {
+  const vs = window.speechSynthesis.getVoices();
+  if (!vs.length) return null;
+  const want = ['Google UK English Male','Daniel','Eddy','Alex','Fred','Microsoft David','Microsoft Mark'];
+  for (const n of want) {
+    const v = vs.find(x => x.name.includes(n.split(' ')[0]) && x.lang.startsWith('en'));
+    if (v) return v;
+  }
+  const men = vs.filter(v => v.lang.startsWith('en') &&
+    !/(female|samantha|victoria|karen|moira|tessa|fiona|alice|susan|zoe|emily|lisa)/i.test(v.name));
+  return men[0] || vs.find(v => v.lang.startsWith('en')) || vs[0];
 }
 
-async function startCam(){
-  if(!apiKey){ addAlert('warn','Enter Groq API key first!'); return; }
-  try{
-    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});
-    video.srcObject=stream;
-    await video.play();
-    document.getElementById('no-cam').style.display='none';
-    ['hc1','hc2','hc3','hc4','hud-live','fps-el'].forEach(id=>document.getElementById(id).style.display='block');
-    document.getElementById('cam-dot').className='sdot live';
-    document.getElementById('cam-st').textContent='LIVE';
-    document.getElementById('analyze-btn').disabled=false;
-    startFpsLoop();
-    scheduleAuto();
-    addMsg('ai','Camera is live! Auto-analysis every 10 seconds. Hit "Analyze Frame Now" for instant scan, or chat with me about what you see.');
-    addAlert('ok','Camera connected — live detection active');
-  }catch(e){ addAlert('warn','Camera error: '+e.message); }
+function buildFredScript(text) {
+  const parts = [];
+  text.split('\n').forEach(line => {
+    const i = line.indexOf(':'); if (i < 1) return;
+    const k = line.slice(0, i).trim().toUpperCase();
+    const v = line.slice(i + 1).trim();
+    if (!v || ['NONE','NONE DETECTED','NONE SEEN'].includes(v.toUpperCase())) return;
+    if (k === 'SCENE') {
+      parts.push('Bedrock bulletin! ' + v);
+    } else if (k === 'OBJECTS' || k === 'PERSONS') {
+      const intro = FRED_INTROS[Math.floor(Math.random() * FRED_INTROS.length)];
+      const objs  = v.split(',').map(s => s.trim()).filter(Boolean).join(', and ');
+      parts.push(intro + ' ' + objs + '!');
+    } else if (k === 'ALERT') {
+      parts.push(FRED_HAZARD[Math.floor(Math.random() * FRED_HAZARD.length)] + ' ' + v + '!');
+    } else if (k === 'GUIDANCE') {
+      parts.push('Fred says — ' + v);
+    } else if (k === 'HAZARDS') {
+      parts.push('Watch out! ' + v);
+    }
+  });
+  return parts.length ? parts.join('... ') : "Yabba dabba doo! Scan complete, nothing unusual pal!";
 }
 
-function startFpsLoop(){
-  const loop=()=>{
-    fpsCount++;
-    const now=Date.now();
-    if(now-lastFpsT>=1000){ document.getElementById('fps-el').textContent=fpsCount+' FPS'; fpsCount=0; lastFpsT=now; }
-    renderOverlay();
+function speakFred(script) {
+  const u = new SpeechSynthesisUtterance(script);
+  u.pitch  = parseFloat(document.getElementById('pitch-sl').value);
+  u.rate   = parseFloat(document.getElementById('rate-sl').value);
+  u.volume = 1;
+  u.voice  = pickFredVoice();
+  u.onstart  = () => document.getElementById('spk-badge').classList.add('on');
+  u.onend    = () => document.getElementById('spk-badge').classList.remove('on');
+  u.onerror  = () => document.getElementById('spk-badge').classList.remove('on');
+  window.speechSynthesis.speak(u);
+}
+
+function fredVoice(text) {
+  if (!voiceOn || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  speakFred(buildFredScript(text));
+}
+
+function fredTest() {
+  if (!window.speechSynthesis) { addAlt('w', 'Speech not supported on this browser'); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(
+    "Yabba dabba doo! Fred Flintstone here... Wilmaaa! The surveillance system is online!... Bedrock technology at its finest!"
+  );
+  u.pitch  = parseFloat(document.getElementById('pitch-sl').value);
+  u.rate   = parseFloat(document.getElementById('rate-sl').value);
+  u.volume = 1;
+  u.voice  = pickFredVoice();
+  u.onstart = () => document.getElementById('spk-badge').classList.add('on');
+  u.onend   = () => document.getElementById('spk-badge').classList.remove('on');
+  window.speechSynthesis.speak(u);
+}
+
+function toggleVoice() {
+  voiceOn = !voiceOn;
+  const t = document.getElementById('vtog');
+  t.classList.toggle('on', voiceOn);
+  t.setAttribute('aria-checked', voiceOn);
+  document.getElementById('fdesc').textContent = voiceOn
+    ? 'ON — Fred is narrating detections!'
+    : 'OFF — flip to hear Fred narrate';
+  if (voiceOn) {
+    window.speechSynthesis.getVoices();
+    setTimeout(() => {
+      speakFred("Yabba dabba doo! Voice activated, pal! Fred Flintstone reporting for duty in Bedrock!");
+    }, 150);
+  } else {
+    window.speechSynthesis.cancel();
+    document.getElementById('spk-badge').classList.remove('on');
+  }
+}
+
+// ─── API Key ──────────────────────────────────────────────────────────────────
+function saveKey() {
+  const v = document.getElementById('api-in').value.trim();
+  if (!v.startsWith('gsk_')) { addAlt('w', 'Groq keys start with gsk_ — check your key'); return; }
+  key = v;
+  document.getElementById('api-ok').style.display = 'inline';
+  document.getElementById('api-in').value = '••••••••••••••••••••••';
+  document.getElementById('cam-btn').disabled = false;
+  addAlt('g', 'API key saved — tap Start Camera');
+  addMsg('ai', 'Key saved! Tap START CAMERA. Flip the 🦕 voice switch for Fred to narrate what he sees!');
+}
+
+// ─── Mode ─────────────────────────────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  ['gen','drv','sec','cus'].forEach(id => document.getElementById('t-' + id).classList.remove('on'));
+  const map = { general:'gen', driving:'drv', security:'sec', custom:'cus' };
+  document.getElementById('t-' + map[m]).classList.add('on');
+  document.getElementById('mode-pill').textContent = m.toUpperCase();
+  addMsg('ai', 'Mode: ' + m.toUpperCase() + '. ' + HINTS[m]);
+}
+
+// ─── Camera ───────────────────────────────────────────────────────────────────
+async function startCam() {
+  if (!key) { addAlt('w', 'Enter your Groq API key first'); return; }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+    vid.srcObject = stream;
+    await vid.play();
+    document.getElementById('nocam').style.display = 'none';
+    ['c1','c2','c3','c4','hlive','hfps'].forEach(id => document.getElementById(id).style.display = 'block');
+    document.getElementById('cdot').className = 'dot live';
+    document.getElementById('cst').textContent  = 'LIVE';
+    document.getElementById('scan-btn').disabled = false;
+    startFps();
+    autoLoop();
+    addMsg('ai', 'Camera live! Auto-scanning every 10s. Toggle Fred\'s voice or hit Analyze Now anytime!');
+    addAlt('g', 'Camera connected — detection active');
+    window.speechSynthesis?.getVoices();
+  } catch (e) {
+    addAlt('w', 'Camera error: ' + e.message);
+  }
+}
+
+// ─── FPS / Render loop ────────────────────────────────────────────────────────
+function startFps() {
+  requestAnimationFrame(function loop() {
+    fps++;
+    if (Date.now() - fpsT >= 1000) {
+      document.getElementById('hfps').textContent = fps + ' FPS';
+      fps = 0; fpsT = Date.now();
+    }
+    renderScan();
     requestAnimationFrame(loop);
-  };
-  requestAnimationFrame(loop);
+  });
 }
 
-function renderOverlay(){
-  if(!video.videoWidth) return;
-  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-  ctx.drawImage(video,0,0);
-  const t=Date.now()/1000;
-  const scanY=(Math.sin(t*0.45)*0.5+0.5)*canvas.height;
-  const g=ctx.createLinearGradient(0,scanY-32,0,scanY+32);
-  g.addColorStop(0,'rgba(0,229,255,0)'); g.addColorStop(0.5,'rgba(0,229,255,0.055)'); g.addColorStop(1,'rgba(0,229,255,0)');
-  ctx.fillStyle=g; ctx.fillRect(0,scanY-32,canvas.width,64);
-  ctx.strokeStyle='rgba(0,229,255,0.12)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(0,scanY); ctx.lineTo(canvas.width,scanY); ctx.stroke();
+function renderScan() {
+  if (!vid.videoWidth) return;
+  cv.width  = vid.videoWidth;
+  cv.height = vid.videoHeight;
+  cx.drawImage(vid, 0, 0);
+  const t = Date.now() / 1000;
+  const y = (Math.sin(t * .5) * .5 + .5) * cv.height;
+  const g = cx.createLinearGradient(0, y - 30, 0, y + 30);
+  g.addColorStop(0,   'rgba(0,0,0,0)');
+  g.addColorStop(.5,  dark ? 'rgba(0,220,255,0.06)' : 'rgba(0,120,160,0.09)');
+  g.addColorStop(1,   'rgba(0,0,0,0)');
+  cx.fillStyle = g;
+  cx.fillRect(0, y - 30, cv.width, 60);
+  cx.strokeStyle = dark ? 'rgba(0,220,255,0.12)' : 'rgba(0,120,160,0.16)';
+  cx.lineWidth = 1;
+  cx.beginPath(); cx.moveTo(0, y); cx.lineTo(cv.width, y); cx.stroke();
 }
 
-function scheduleAuto(){
-  const loop=()=>{ if(stream&&!analyzing) analyzeNow(true); setTimeout(loop,10000); };
-  setTimeout(loop,4000);
+// ─── Auto scan ────────────────────────────────────────────────────────────────
+function autoLoop() {
+  setTimeout(function go() {
+    if (stream && !busy) doScan(true);
+    setTimeout(go, 10000);
+  }, 4000);
 }
 
-function captureJpeg(maxW=640){
-  if(!video.videoWidth) return null;
-  const scale=Math.min(1,maxW/video.videoWidth);
-  const c=document.createElement('canvas');
-  c.width=Math.round(video.videoWidth*scale); c.height=Math.round(video.videoHeight*scale);
-  c.getContext('2d').drawImage(video,0,0,c.width,c.height);
-  return c.toDataURL('image/jpeg',0.72).split(',')[1];
+// ─── Capture frame ────────────────────────────────────────────────────────────
+function grab() {
+  if (!vid.videoWidth) return null;
+  const s = Math.min(1, 640 / vid.videoWidth);
+  const c = document.createElement('canvas');
+  c.width  = Math.round(vid.videoWidth  * s);
+  c.height = Math.round(vid.videoHeight * s);
+  c.getContext('2d').drawImage(vid, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', .72).split(',')[1];
 }
 
-async function analyzeNow(auto=false){
-  if(analyzing||!stream||!apiKey) return;
-  const b64=captureJpeg(); if(!b64) return;
-  lastFrame=b64; analyzing=true;
-  document.getElementById('ai-dot').className='sdot live';
-  document.getElementById('ai-st').textContent='ANALYZING...';
-  if(!auto) addMsg('ai','Scanning current frame...');
-  try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-      body:JSON.stringify({
-        model:MODELS[modelIdx], max_tokens:600,
-        messages:[
-          {role:'system',content:'You are a precise visual AI assistant. Follow the response format exactly.'},
-          {role:'user',content:[
-            {type:'image_url',image_url:{url:'data:image/jpeg;base64,'+b64}},
-            {type:'text',text:MODE_PROMPTS[currentMode]}
+// ─── Analyze frame ────────────────────────────────────────────────────────────
+async function doScan(auto = false) {
+  if (busy || !stream || !key) return;
+  const b64 = grab(); if (!b64) return;
+  lastB64 = b64; busy = true;
+  document.getElementById('adot').className  = 'dot live';
+  document.getElementById('ast').textContent = 'SCANNING...';
+  if (!auto) addMsg('ai', 'Analyzing frame...');
+  try {
+    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: MODELS[mIdx], max_tokens: 550,
+        messages: [
+          { role: 'system', content: 'Precise visual AI. Follow the response format exactly. No markdown.' },
+          { role: 'user', content: [
+            { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + b64 } },
+            { type: 'text', text: PROMPTS[mode] }
           ]}
         ]
       })
     });
-    const data=await resp.json();
-    if(data.error){
-      if(data.error.message?.includes('model')||data.error.code==='model_not_found'){
-        modelIdx=(modelIdx+1)%MODELS.length;
-        addAlert('info','Switching model: '+MODELS[modelIdx]);
-        analyzing=false; document.getElementById('ai-dot').className='sdot ok'; document.getElementById('ai-st').textContent='AI READY';
-        setTimeout(()=>analyzeNow(auto),600); return;
+    const d = await r.json();
+    if (d.error) {
+      if (d.error.message?.includes('model') || d.error.code === 'model_not_found') {
+        mIdx = (mIdx + 1) % MODELS.length;
+        addAlt('b', 'Switching model: ' + MODELS[mIdx]);
+        busy = false;
+        document.getElementById('adot').className  = 'dot ok';
+        document.getElementById('ast').textContent = 'AI READY';
+        setTimeout(() => doScan(auto), 700);
+        return;
       }
-      throw new Error(data.error.message||'Groq API error');
+      throw new Error(d.error.message);
     }
-    const text=data.choices?.[0]?.message?.content||'';
-    parseDisplay(text);
-    history.push({role:'user',content:[{type:'text',text:'[Frame analyzed]'}]});
-    history.push({role:'assistant',content:text});
-    if(history.length>16) history=history.slice(-12);
-  }catch(e){ addAlert('warn','Error: '+String(e.message).substring(0,70)); }
-  analyzing=false;
-  document.getElementById('ai-dot').className='sdot ok';
-  document.getElementById('ai-st').textContent='AI READY';
+    const txt = d.choices?.[0]?.message?.content || '';
+    parseResult(txt);
+    if (voiceOn) fredVoice(txt);
+    hist.push({ role: 'user',      content: [{ type: 'text', text: '[frame]' }] });
+    hist.push({ role: 'assistant', content: txt });
+    if (hist.length > 14) hist = hist.slice(-12);
+  } catch (e) {
+    addAlt('w', 'Error: ' + String(e.message).slice(0, 60));
+  }
+  busy = false;
+  document.getElementById('adot').className  = 'dot ok';
+  document.getElementById('ast').textContent = 'AI READY';
 }
 
-function parseDisplay(text){
-  addMsg('ai',text);
-  const lines=text.split('\n'); const items=[]; let hasAlert=false;
-  for(const line of lines){
-    const ci=line.indexOf(':'); if(ci<1) continue;
-    const key=line.substring(0,ci).trim().toUpperCase();
-    const val=line.substring(ci+1).trim();
-    if(!val||['NONE','NONE DETECTED','NONE SEEN'].includes(val.toUpperCase())) continue;
-    if(key==='ALERT'){ addAlert('warn',val); hasAlert=true; }
-    else if(key==='OBJECTS'||key==='PERSONS'){ val.split(',').slice(0,6).forEach(o=>{const t=o.trim();if(t.length>1)items.push({label:t,sub:key});}); }
-    else if(['SCENE','HAZARDS','SIGNS','GUIDANCE','ACTIVITY','DETAILS','ENTRY POINTS'].includes(key)){ items.push({label:key,sub:val.substring(0,36)}); }
-  }
-  if(items.length>0){
-    const dl=document.getElementById('detections-list'); dl.innerHTML='';
-    items.slice(0,7).forEach(it=>{
-      const d=document.createElement('div'); d.className='det-item';
-      d.innerHTML=`<div class="det-ico">${emojiFor(it.label)}</div><div class="det-name">${it.label.substring(0,20)}</div><div class="det-val">${it.sub.substring(0,24)}</div>`;
+// ─── Parse & display results ──────────────────────────────────────────────────
+function parseResult(txt) {
+  addMsg('ai', txt);
+  const items = []; let hasAlert = false;
+  txt.split('\n').forEach(line => {
+    const i = line.indexOf(':'); if (i < 1) return;
+    const k = line.slice(0, i).trim().toUpperCase();
+    const v = line.slice(i + 1).trim();
+    if (!v || ['NONE','NONE DETECTED','NONE SEEN'].includes(v.toUpperCase())) return;
+    if (k === 'ALERT') { addAlt('w', v); hasAlert = true; }
+    else if (k === 'OBJECTS' || k === 'PERSONS') {
+      v.split(',').slice(0, 5).forEach(o => { const t = o.trim(); if (t) items.push({ n: t, s: k }); });
+    } else if (['SCENE','HAZARDS','SIGNS','GUIDANCE','ACTIVITY','DETAILS','ENTRY POINTS'].includes(k)) {
+      items.push({ n: k, s: v.slice(0, 36) });
+    }
+  });
+  if (items.length) {
+    const dl = document.getElementById('det-list'); dl.innerHTML = '';
+    items.slice(0, 7).forEach(it => {
+      const d = document.createElement('div'); d.className = 'di';
+      d.innerHTML = `<div class="di-ico">${ico(it.n)}</div><div class="di-name">${it.n.slice(0,22)}</div><div class="di-val">${it.s.slice(0,24)}</div>`;
       dl.appendChild(d);
     });
   }
-  if(!hasAlert) addAlert('ok','Frame analyzed — no alerts');
+  if (!hasAlert) addAlt('g', 'Scan complete — no alerts');
 }
 
-async function sendChat(){
-  const inp=document.getElementById('chat-in'); const msg=inp.value.trim();
-  if(!msg) return;
-  if(!apiKey){ addAlert('warn','Enter Groq API key first'); return; }
-  inp.value=''; addMsg('usr',msg);
-  document.getElementById('send-btn').disabled=true;
-  const thinking=addMsg('ai','Thinking...',true);
-  const b64=lastFrame||(stream?captureJpeg():null);
-  const userContent=[];
-  if(b64) userContent.push({type:'image_url',image_url:{url:'data:image/jpeg;base64,'+b64}});
-  userContent.push({type:'text',text:msg});
-  try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-      body:JSON.stringify({
-        model:MODELS[modelIdx], max_tokens:700,
-        messages:[
-          {role:'system',content:`You are a visual AI assistant in ${currentMode.toUpperCase()} mode. ${MODE_HINTS[currentMode]} Be helpful and concise.`},
-          ...history,
-          {role:'user',content:userContent}
+// ─── Chat ─────────────────────────────────────────────────────────────────────
+async function sendChat() {
+  const el  = document.getElementById('cin');
+  const msg = el.value.trim(); if (!msg) return;
+  if (!key) { addAlt('w', 'Enter API key first'); return; }
+  el.value = ''; addMsg('me', msg);
+  document.getElementById('send').disabled = true;
+  const th = addMsg('ai', 'Thinking...', true);
+  const b64 = lastB64 || (stream ? grab() : null);
+  const uc  = [];
+  if (b64) uc.push({ type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + b64 } });
+  uc.push({ type: 'text', text: msg });
+  try {
+    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: MODELS[mIdx], max_tokens: 600,
+        messages: [
+          { role: 'system', content: `Visual AI assistant in ${mode.toUpperCase()} mode. ${HINTS[mode]} Be helpful and concise.` },
+          ...hist, { role: 'user', content: uc }
         ]
       })
     });
-    const data=await resp.json();
-    if(data.error) throw new Error(data.error.message);
-    const text=data.choices?.[0]?.message?.content||'No response';
-    thinking.textContent=text; thinking.classList.remove('thinking');
-    history.push({role:'user',content:[{type:'text',text:msg}]});
-    history.push({role:'assistant',content:text});
-    if(history.length>16) history=history.slice(-12);
-  }catch(e){ thinking.textContent='Error: '+String(e.message).substring(0,80); thinking.classList.remove('thinking'); }
-  document.getElementById('send-btn').disabled=false;
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message);
+    const txt = d.choices?.[0]?.message?.content || 'No response';
+    th.textContent = txt; th.classList.remove('th');
+    if (voiceOn) fredVoice(txt);
+    hist.push({ role: 'user',      content: [{ type: 'text', text: msg }] });
+    hist.push({ role: 'assistant', content: txt });
+    if (hist.length > 14) hist = hist.slice(-12);
+  } catch (e) {
+    th.textContent = 'Error: ' + String(e.message).slice(0, 80);
+    th.classList.remove('th');
+  }
+  document.getElementById('send').disabled = false;
 }
 
-function addMsg(role,text,isThinking){
-  const box=document.getElementById('chat-msgs');
-  const d=document.createElement('div');
-  d.className='msg '+role+(isThinking?' thinking':'');
-  d.textContent=text; box.appendChild(d); box.scrollTop=box.scrollHeight; return d;
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function addMsg(role, text, isThinking) {
+  const box = document.getElementById('msgs');
+  const d   = document.createElement('div');
+  d.className   = 'm ' + role + (isThinking ? ' th' : '');
+  d.textContent = text;
+  box.appendChild(d); box.scrollTop = box.scrollHeight; return d;
 }
 
-function addAlert(type,text){
-  const box=document.getElementById('alerts-box');
-  const d=document.createElement('div');
-  d.className='alert-item a-'+(type==='warn'?'warn':type==='ok'?'ok':'info');
-  d.textContent=String(text).substring(0,90); box.appendChild(d); box.scrollTop=box.scrollHeight;
-  while(box.children.length>7) box.removeChild(box.firstChild);
+function addAlt(type, text) {
+  const box = document.getElementById('alt-box');
+  const d   = document.createElement('div');
+  d.className   = 'al ' + (type==='w' ? 'al-w' : type==='g' ? 'al-g' : 'al-b');
+  d.textContent = String(text).slice(0, 90);
+  box.appendChild(d); box.scrollTop = box.scrollHeight;
+  while (box.children.length > 6) box.removeChild(box.firstChild);
 }
 
-function emojiFor(label){
-  const l=label.toLowerCase();
-  if(l.includes('person')||l.includes('people')||l.includes('man')||l.includes('woman')) return '🧑';
-  if(l.includes('car')||l.includes('vehicle')||l.includes('truck')||l.includes('bus')) return '🚗';
-  if(l.includes('bike')||l.includes('cyclist')||l.includes('motorcycle')) return '🏍️';
-  if(l.includes('sign')||l.includes('signal')||l.includes('traffic')) return '🚦';
-  if(l.includes('road')||l.includes('lane')||l.includes('highway')) return '🛣️';
-  if(l.includes('hazard')||l.includes('danger')||l.includes('risk')) return '⚠️';
-  if(l.includes('building')||l.includes('house')||l.includes('store')) return '🏠';
-  if(l.includes('dog')||l.includes('cat')||l.includes('animal')) return '🐾';
-  if(l.includes('door')||l.includes('window')||l.includes('entry')) return '🚪';
+function ico(l) {
+  l = l.toLowerCase();
+  if (/person|people|man|woman|human/.test(l))  return '🧑';
+  if (/car|vehicle|truck|bus|suv/.test(l))       return '🚗';
+  if (/bike|cyclist|motorcycle/.test(l))         return '🏍️';
+  if (/sign|signal|traffic|light/.test(l))       return '🚦';
+  if (/road|lane|highway|street/.test(l))        return '🛣️';
+  if (/hazard|danger|risk|warn/.test(l))         return '⚠️';
+  if (/building|house|store|shop/.test(l))       return '🏠';
+  if (/dog|cat|animal|bird/.test(l))             return '🐾';
+  if (/door|window|entry|gate/.test(l))          return '🚪';
+  if (/scene|activity|guid|detail/.test(l))      return '📋';
   return '📍';
 }
 
-document.getElementById('chat-in').addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(); }
+// Enter to send
+document.getElementById('cin').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
 });
+
+// Pre-load voices
+if (window.speechSynthesis) {
+  window.speechSynthesis.addEventListener('voiceschanged', () => {});
+  window.speechSynthesis.getVoices();
+}
 </script>
 </body>
 </html>
